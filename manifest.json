@@ -1,0 +1,24 @@
+{
+    "manifest_version": 2,
+    "name": "Element Hider",
+    "version": "1.0",
+    "description": "Hide elements on the webpage by class name and ID.",
+    "permissions": [
+      "activeTab",
+      "declarativeContent"
+    ],
+    "background": {
+      "scripts": ["background.js"],
+      "persistent": false
+    },
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"]
+      }
+    ],
+    "browser_action": {
+      "default_popup": "popup.html"
+    }
+  }
+  
