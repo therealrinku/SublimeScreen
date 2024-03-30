@@ -21,14 +21,14 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   const { action, classNames, ids } = request;
 
   if (action === "hideElements") {
-    const last = JSON.parse(localStorage.getItem("hiddenElements")) || { classNames: [], ids: [] };
+    // const last = JSON.parse(localStorage.getItem("hiddenElements")) || { classNames: [], ids: [] };
 
-    const allClassNames = [...last.classNames, ...classNames].filter((item) => item);
-    const allIds = [...last.ids, ...ids].filter((item) => item);
+    // const allClassNames = [...last.classNames, ...classNames].filter((item) => item);
+    // const allIds = [...last.ids, ...ids].filter((item) => item);
 
     localStorage.setItem(
       "hiddenElements",
-      JSON.stringify({ classNames: [...new Set(allClassNames)], ids: [...new Set(allIds)] })
+      JSON.stringify({ classNames: [...new Set(classNames)], ids: [...new Set(ids)] })
     );
 
     console.log(`LOG: sublimate has cleaned up ${window.origin} Enjoy!`);

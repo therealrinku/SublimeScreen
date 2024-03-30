@@ -1,23 +1,93 @@
+const supportedHosts = {
+  "www.youtube.com": {
+    name: "Youtube",
+    modes: {
+      default: {
+        hiddenClassNames: [],
+        hiddenIds: [],
+      },
+      clean: {
+        hiddenClassNames: [""],
+        hiddenIds: ["secondary"],
+      },
+      minimal: {
+        hiddenClassNames: [""],
+        hiddenIds: ["secondary"],
+      },
+    },
+  },
+  "www.facebook.com": {
+    name: "Facebook",
+  },
+};
+
 document.addEventListener("DOMContentLoaded", function () {
-  document.getElementById("hideElementsBtn").addEventListener("click", function () {
-    const classNames = document
-      .getElementById("classNames")
-      .value.split(",")
-      .map((className) => className.trim());
+  const currentPageText = document.querySelector(".current-page");
+  const modesDivNode = document.querySelector(".modes");
 
-    const ids = document
-      .getElementById("ids")
-      .value.split(",")
-      .map((id) => id.trim());
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    const hostName = new URL(tabs[0].url).host;
 
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      chrome.tabs.sendMessage(tabs[0].id, {
-        action: "hideElements",
-        classNames: classNames,
-        ids: ids,
+    const info = supportedHosts[hostName];
+
+    if (!info) {
+      currentPageText.innerHTML = "Unsupported Site.";
+      return;
+    }
+
+    currentPageText.innerHTML = info.name;
+
+    // modes
+    Object.entries(info.modes).forEach((mode) => {
+      const wrapper = document.createElement("div");
+      const radioElem = document.createElement("input");
+      const label = document.createElement("label");
+
+      radioElem.type = "radio";
+      radioElem.name = hostName;
+      radioElem.defaultChecked = mode[0] === "default";
+      radioElem.id = `${hostName}-${mode[0]}`;
+      radioElem.value = `${hostName}-${mode[0]}`;
+      radioElem.addEventListener("click", function (e) {
+        console.log(e.target.checked, "checked");
+        const [host, mode] = e.target.value.split("-");
+
+        const { hiddenClassNames, hiddenIds } = supportedHosts[host].modes[mode];
+
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: "hideElements",
+          classNames: hiddenClassNames,
+          ids: hiddenIds,
+        });
       });
+      label.innerText = mode[0];
+      label.htmlFor = `${hostName}-${mode[0]}`;
+      wrapper.appendChild(radioElem);
+      wrapper.appendChild(label);
+
+      modesDivNode.appendChild(wrapper);
     });
   });
+
+  // document.getElementById("hideElementsBtn").addEventListener("click", function () {
+  //   const classNames = document
+  //     .getElementById("classNames")
+  //     .value.split(",")
+  //     .map((className) => className.trim());
+
+  //   const ids = document
+  //     .getElementById("ids")
+  //     .value.split(",")
+  //     .map((id) => id.trim());
+
+  //   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+  //     chrome.tabs.sendMessage(tabs[0].id, {
+  //       action: "hideElements",
+  //       classNames: classNames,
+  //       ids: ids,
+  //     });
+  //   });
+  // });
 });
 
 function hideElementsByClassName(classNames) {

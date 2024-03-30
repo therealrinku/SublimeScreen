@@ -4,3 +4,7 @@ body{
     height: 300px;
     width: 300px;
 }
+
+input{
+    padding:5px 10px;
+}
