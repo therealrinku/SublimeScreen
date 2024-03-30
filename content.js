@@ -1,5 +1,3 @@
-// content.js
-
 function hideElementsByClassName(classNames) {
   classNames.forEach((className) => {
     const elements = document.getElementsByClassName(className);
@@ -18,9 +16,23 @@ function hideElementsById(ids) {
   });
 }
 
+// this runs on current active tab
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  if (request.action === "hideElements") {
-    hideElementsByClassName(request.classNames);
-    hideElementsById(request.ids);
+  const { action, classNames, ids } = request;
+
+  if (action === "hideElements") {
+    const last = JSON.parse(localStorage.getItem("hiddenElements")) || { classNames: [], ids: [] };
+
+    const allClassNames = [...last.classNames, ...classNames].filter((item) => item);
+    const allIds = [...last.ids, ...ids].filter((item) => item);
+
+    localStorage.setItem(
+      "hiddenElements",
+      JSON.stringify({ classNames: [...new Set(allClassNames)], ids: [...new Set(allIds)] })
+    );
+
+    console.log(`LOG: sublimate has cleaned up ${window.origin} Enjoy!`);
+    hideElementsByClassName(classNames);
+    hideElementsById(ids);
   }
 });

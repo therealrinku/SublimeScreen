@@ -11,18 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
       .map((id) => id.trim());
 
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      //save this info to localStorage to persist the changes on another load
-      const currentUrl = new URL(tabs[0].url).origin;
-      const last = JSON.parse(localStorage.getItem(currentUrl)) || { classNames: [], ids: [] };
-
-      const allClassNames = [...last.classNames, ...classNames].filter((item) => item);
-      const allIds = [...last.ids, ...ids].filter((item) => item);
-
-      localStorage.setItem(
-        currentUrl,
-        JSON.stringify({ classNames: [...new Set(allClassNames)], ids: [...new Set(allIds)] })
-      );
-
       chrome.tabs.sendMessage(tabs[0].id, {
         action: "hideElements",
         classNames: classNames,
@@ -32,15 +20,34 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    //apply changes
-    const currentUrl = new URL(tabs[0].url).origin;
-    const last = JSON.parse(localStorage.getItem(currentUrl)) || { classNames: [], ids: [] };
-  
-    chrome.tabs.sendMessage(tabs[0].id, {
-      action: "hideElements",
-      classNames: last.classNames,
-      ids: last.ids,
-    });
+function hideElementsByClassName(classNames) {
+  if (!Array.isArray(classNames)) {
+    return;
+  }
+
+  classNames.forEach((className) => {
+    const elements = document.getElementsByClassName(className);
+    for (let i = 0; i < elements.length; i++) {
+      elements[i].style.display = "none";
+    }
   });
-  
+}
+
+function hideElementsById(ids) {
+  if (!Array.isArray(ids)) {
+    return;
+  }
+
+  ids.forEach((id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.style.display = "none";
+    }
+  });
+}
+
+// execute the code on the tab to hide the last selected elements
+const last = JSON.parse(localStorage.getItem("hiddenElements")) || { classNames: [], ids: [] };
+hideElementsByClassName(last.classNames);
+hideElementsById(last.ids);
+console.log(`LOG: sublimate has cleaned up ${window.origin}. Enjoy!`);
