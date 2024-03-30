@@ -16,9 +16,18 @@ function hideElementsById(ids) {
   });
 }
 
+function hideElementsByRoles(roles) {
+  roles.forEach((role) => {
+    const element = document.querySelector(`[role=${role}]`);
+    if (element) {
+      element.style.display = "none";
+    }
+  });
+}
+
 // this runs on current active tab
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  const { action, classNames, ids } = request;
+  const { action, classNames, ids, roles } = request;
 
   if (action === "hideElements") {
     // const last = JSON.parse(localStorage.getItem("hiddenElements")) || { classNames: [], ids: [] };
@@ -28,11 +37,12 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
     localStorage.setItem(
       "hiddenElements",
-      JSON.stringify({ classNames: [...new Set(classNames)], ids: [...new Set(ids)] })
+      JSON.stringify({ classNames: [...new Set(classNames)], ids: [...new Set(ids)], roles: [...new Set(roles)] })
     );
 
     console.log(`LOG: sublimate has cleaned up ${window.origin} Enjoy!`);
     hideElementsByClassName(classNames);
     hideElementsById(ids);
+    hideElementsByRoles(roles);
   }
 });

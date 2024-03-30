@@ -18,6 +18,23 @@ const supportedHosts = {
   },
   "www.facebook.com": {
     name: "Facebook",
+    modes: {
+      default: {
+        hiddenClassNames: [],
+        hiddenIds: [],
+        hiddenRoles: [],
+      },
+      clean: {
+        hiddenClassNames: [],
+        hiddenIds: [],
+        hiddenRoles: [],
+      },
+      minimal: {
+        hiddenClassNames: [],
+        hiddenIds: [],
+        hiddenRoles: ["complementary", "navigation"],
+      },
+    },
   },
 };
 
@@ -49,15 +66,15 @@ document.addEventListener("DOMContentLoaded", function () {
       radioElem.id = `${hostName}-${mode[0]}`;
       radioElem.value = `${hostName}-${mode[0]}`;
       radioElem.addEventListener("click", function (e) {
-        console.log(e.target.checked, "checked");
         const [host, mode] = e.target.value.split("-");
 
-        const { hiddenClassNames, hiddenIds } = supportedHosts[host].modes[mode];
+        const { hiddenClassNames, hiddenIds, hiddenRoles } = supportedHosts[host].modes[mode];
 
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "hideElements",
           classNames: hiddenClassNames,
           ids: hiddenIds,
+          roles: hiddenRoles,
         });
       });
       label.innerText = mode[0];
@@ -116,8 +133,18 @@ function hideElementsById(ids) {
   });
 }
 
+function hideElementsByRoles(roles) {
+  roles.forEach((role) => {
+    const element = document.querySelector(`[role=${role}]`);
+    if (element) {
+      element.style.display = "none";
+    }
+  });
+}
+
 // execute the code on the tab to hide the last selected elements
-const last = JSON.parse(localStorage.getItem("hiddenElements")) || { classNames: [], ids: [] };
+const last = JSON.parse(localStorage.getItem("hiddenElements")) || { classNames: [], ids: [], roles: [] };
 hideElementsByClassName(last.classNames);
 hideElementsById(last.ids);
+hideElementsByRoles(last.roles);
 console.log(`LOG: sublimate has cleaned up ${window.origin}. Enjoy!`);
