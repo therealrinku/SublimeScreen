@@ -1,2 +1,9 @@
-# SublimeScreen
-Chrome Extension for hiding elements on the webpage so that you can focus on what matters the most
+<div align="center">
+
+  <h3 align="center">sublimate</h3>
+
+  <p align="center">
+    Chrome extensions to hide elements of webpage and make it look minimal
+    <br />
+  </p>
+</div>
